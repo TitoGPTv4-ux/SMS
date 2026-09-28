@@ -53,8 +53,6 @@ def _foreign_key_exists(cursor, table, column):
 
 
 def migrate_schema(conn):
-    """Ensures existing tables (created before schema changes) get any
-    missing columns/foreign keys added automatically, without losing data."""
     cursor = conn.cursor()
 
     required_columns = [
@@ -82,19 +80,24 @@ def migrate_schema(conn):
 
 
 def init_database():
-    conn = mysql.connector.connect(
-        host=DB_CONFIG["host"],
-        user=DB_CONFIG["user"],
-        password=DB_CONFIG["password"],
-        port=DB_CONFIG["port"]
-    )
-    cursor = conn.cursor()
-    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['database']}")
-    conn.commit()
-    cursor.close()
-    conn.close()
+    try:
+        server_conn = mysql.connector.connect(
+            host=DB_CONFIG["host"],
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"],
+            port=DB_CONFIG["port"]
+        )
+        server_cursor = server_conn.cursor()
+        server_cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_CONFIG['database']}`")
+        server_conn.commit()
+        server_cursor.close()
+        server_conn.close()
+    except Error:
+        pass
 
     conn = get_connection()
+    if conn is None:
+        return
     cursor = conn.cursor()
 
     cursor.execute("""
