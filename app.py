@@ -1,3 +1,7 @@
+import os
+print("DEBUG env:", {k: bool(os.environ.get(k)) for k in ["MYSQL_URL", "MYSQLHOST", "MYSQLPORT", "MYSQLUSER", "MYSQLPASSWORD", "MYSQLDATABASE"]}, flush=True)
+from config import DB_CONFIG
+print("DEBUG DB_CONFIG:", DB_CONFIG["host"], DB_CONFIG["port"], DB_CONFIG["database"], flush=True)
 import streamlit as st
 import pandas as pd
 import base64
