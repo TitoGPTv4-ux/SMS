@@ -66,7 +66,7 @@ def login_page():
         with st.container(border=True):
             show_centered_logo(220)
             st.markdown('<div class="sms-subtitle">Sign in to continue</div>', unsafe_allow_html=True)
-            student_tab, staff_tab = st.tabs(["🎓 Student Login", "👨‍🏫 Staff Login"])
+            student_tab, staff_tab = st.tabs(["Student Login", "Staff Login"])
             with student_tab:
                 _login_form(
                     "student",
