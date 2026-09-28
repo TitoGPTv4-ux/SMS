@@ -1,7 +1,33 @@
+import os
+from urllib.parse import urlparse
+
 import mysql.connector
 from mysql.connector import Error
-from config import DB_CONFIG
 import streamlit as st
+
+
+def _build_db_config():
+    """Soma mipangilio ya database kutoka environment variables za Railway."""
+    url = os.environ.get("MYSQL_URL") or os.environ.get("MYSQL_PUBLIC_URL")
+    if url:
+        p = urlparse(url)
+        return {
+            "host": p.hostname,
+            "port": p.port or 3306,
+            "user": p.username,
+            "password": p.password or "",
+            "database": (p.path or "/railway").lstrip("/") or "railway",
+        }
+    return {
+        "host": os.environ.get("MYSQLHOST") or os.environ.get("MYSQL_HOST") or "localhost",
+        "port": int(os.environ.get("MYSQLPORT") or os.environ.get("MYSQL_PORT") or 3306),
+        "user": os.environ.get("MYSQLUSER") or os.environ.get("MYSQL_USER") or "root",
+        "password": os.environ.get("MYSQLPASSWORD") or os.environ.get("MYSQL_PASSWORD") or "",
+        "database": os.environ.get("MYSQLDATABASE") or os.environ.get("MYSQL_DATABASE") or "railway",
+    }
+
+
+DB_CONFIG = _build_db_config()
 
 
 def get_connection():
@@ -80,6 +106,13 @@ def migrate_schema(conn):
 
 
 def init_database():
+    # Uchunguzi: onyesha host inayotumika (bila password) kwenye Deploy Logs
+    print(
+        f"DB host={DB_CONFIG['host']} port={DB_CONFIG['port']} "
+        f"user={DB_CONFIG['user']} db={DB_CONFIG['database']}",
+        flush=True,
+    )
+
     try:
         server_conn = mysql.connector.connect(
             host=DB_CONFIG["host"],
@@ -92,8 +125,8 @@ def init_database():
         server_conn.commit()
         server_cursor.close()
         server_conn.close()
-    except Error:
-        pass
+    except Error as e:
+        print(f"Server connect/create database failed: {e}", flush=True)
 
     conn = get_connection()
     if conn is None:
@@ -215,10 +248,11 @@ def init_database():
     existing = cursor.fetchone()
     cursor.close()
     if not existing:
+        admin_password = os.environ.get("ADMIN_PASSWORD", "1306")
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO users (username, password, role, full_name, email) VALUES (%s,%s,%s,%s,%s)",
-            ("admin", hash_password("1306"), "admin", "System Administrator", "admin@sms.local")
+            ("admin", hash_password(admin_password), "admin", "System Administrator", "admin@sms.local")
         )
         conn.commit()
         cursor.close()
