@@ -15,8 +15,8 @@ DB_CONFIG = {
     "host": _get("host", "localhost"),
     "user": _get("user", "root"),
     "password": _get("password", ""),
-    "database": _get("database", "student_management_system"),
+    "database": _get("database", "SMS"),
     "port": int(_get("port", 3306))
 }
 
-APP_NAME = "Student Management System"
+APP_NAME = "SMS"
