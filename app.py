@@ -40,9 +40,15 @@ if "db_initialized" not in st.session_state:
 
 
 def _login_form(key, allowed_roles, wrong_portal_msg):
-    username = st.text_input("Username", key=f"{key}_username")
-    password = st.text_input("Password", type="password", key=f"{key}_password")
-    if st.button("Login", use_container_width=True, key=f"{key}_button"):
+    with st.form(f"{key}_login_form"):
+        username = st.text_input("Username", key=f"{key}_username")
+        password = st.text_input("Password", type="password", key=f"{key}_password")
+        submitted = st.form_submit_button("Login", use_container_width=True)
+    if submitted:
+        username = (username or "").strip()
+        if not username or not password:
+            st.warning("Enter both username and password")
+            return
         user = authenticate(username, password)
         if not user:
             st.error("Invalid username or password")
@@ -60,7 +66,7 @@ def login_page():
         with st.container(border=True):
             show_centered_logo(220)
             st.markdown('<div class="sms-subtitle">Sign in to continue</div>', unsafe_allow_html=True)
-            student_tab, staff_tab = st.tabs(["Student Login", "Staff Login"])
+            student_tab, staff_tab = st.tabs(["🎓 Student Login", "👨‍🏫 Staff Login"])
             with student_tab:
                 _login_form(
                     "student",
