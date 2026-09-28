@@ -39,6 +39,20 @@ if "db_initialized" not in st.session_state:
     st.session_state.db_initialized = True
 
 
+def _login_form(key, allowed_roles, wrong_portal_msg):
+    username = st.text_input("Username", key=f"{key}_username")
+    password = st.text_input("Password", type="password", key=f"{key}_password")
+    if st.button("Login", use_container_width=True, key=f"{key}_button"):
+        user = authenticate(username, password)
+        if not user:
+            st.error("Invalid username or password")
+        elif user["role"] not in allowed_roles:
+            st.error(wrong_portal_msg)
+        else:
+            st.session_state.user = user
+            st.rerun()
+
+
 def login_page():
     col1, col2, col3 = st.columns([1, 1.3, 1])
     with col2:
@@ -46,15 +60,19 @@ def login_page():
         with st.container(border=True):
             show_centered_logo(220)
             st.markdown('<div class="sms-subtitle">Sign in to continue</div>', unsafe_allow_html=True)
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            if st.button("Login", use_container_width=True):
-                user = authenticate(username, password)
-                if user:
-                    st.session_state.user = user
-                    st.rerun()
-                else:
-                    st.error("Invalid username or password")
+            student_tab, staff_tab = st.tabs(["🎓 Student Login", "👨‍🏫 Staff Login"])
+            with student_tab:
+                _login_form(
+                    "student",
+                    ("student",),
+                    "This account is not a student account. Please use the Staff Login tab.",
+                )
+            with staff_tab:
+                _login_form(
+                    "staff",
+                    ("admin", "teacher"),
+                    "This is a student account. Please use the Student Login tab.",
+                )
 
 
 def logout():
