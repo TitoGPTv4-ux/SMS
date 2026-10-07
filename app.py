@@ -10,6 +10,7 @@ from datetime import date
 from database import init_database
 from auth import authenticate, create_user, get_all_users, delete_user
 from styles import apply_styles, page_header, metric_box
+from report import build_student_report
 import crud
 
 st.set_page_config(page_title="Student Management System", page_icon="🎓", layout="wide")
@@ -446,6 +447,31 @@ def student_attendance_page(student):
     st.dataframe(att_df[["course_name", "attendance_date", "status"]], use_container_width=True)
 
 
+def student_report_page(student):
+    page_header("My Report", "Download your full academic report")
+    marks_df = crud.get_marks(student_id=student["id"])
+    att_summary = crud.get_attendance_summary(student["id"])
+
+    pdf_bytes = build_student_report(student, marks_df, att_summary)
+    st.download_button(
+        label="📥 Download Report (PDF)",
+        data=pdf_bytes,
+        file_name=f"report_{student['reg_no'].replace('/', '-')}.pdf",
+        mime="application/pdf",
+        use_container_width=True,
+    )
+
+    if marks_df.empty:
+        st.info("No marks recorded yet, so the report will only contain your personal information.")
+    else:
+        st.markdown("### Preview")
+        marks_df["percentage"] = (marks_df["score"].astype(float) / marks_df["max_score"].astype(float) * 100).round(2)
+        st.dataframe(
+            marks_df[["course_name", "exam_name", "score", "max_score", "percentage", "exam_date"]],
+            use_container_width=True,
+        )
+
+
 def admin_manage_users():
     page_header("User Management", "View and manage system accounts")
     users = get_all_users()
@@ -471,7 +497,7 @@ def sidebar_nav(role):
     elif role == "teacher":
         choice = st.sidebar.radio("Menu", ["Dashboard", "My Students", "Marks", "Attendance"])
     else:
-        choice = st.sidebar.radio("Menu", ["Dashboard", "Results", "Attendance"])
+        choice = st.sidebar.radio("Menu", ["Dashboard", "Results", "Attendance", "Report"])
     st.sidebar.markdown("---")
     if st.sidebar.button("Logout", use_container_width=True):
         logout()
@@ -529,6 +555,8 @@ def main():
             student_results_page(student)
         elif choice == "Attendance":
             student_attendance_page(student)
+        elif choice == "Report":
+            student_report_page(student)
 
 
 if __name__ == "__main__":
