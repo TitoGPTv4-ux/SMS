@@ -13,7 +13,7 @@ from styles import apply_styles, page_header, metric_box
 from report import build_student_report
 import crud
 
-st.set_page_config(page_title="Student Management System", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="Student Management System", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
 apply_styles()
 
 
