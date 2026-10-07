@@ -5,19 +5,31 @@ CUSTOM_CSS = """
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {background: transparent !important;}
-[data-testid="stToolbar"] {visibility: hidden;}
+[data-testid="stHeader"] {background: transparent !important;}
 [data-testid="stDecoration"] {display: none;}
+[data-testid="stAppDeployButton"],
+.stDeployButton,
+[data-testid="stMainMenu"],
+[data-testid="stToolbarActions"],
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+[data-testid="stExpandSidebarButton"],
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"] {
-    visibility: visible !important;
     display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
+[data-testid="stExpandSidebarButton"],
+[data-testid="stExpandSidebarButton"] button,
 [data-testid="stSidebarCollapsedControl"] button,
 [data-testid="collapsedControl"] button,
 [data-testid="stSidebarCollapseButton"] button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     border-radius: 10px;
 }
+[data-testid="stExpandSidebarButton"] svg,
 [data-testid="stSidebarCollapsedControl"] svg,
 [data-testid="collapsedControl"] svg,
 [data-testid="stSidebarCollapseButton"] svg {
